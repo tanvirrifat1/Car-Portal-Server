@@ -20,6 +20,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const carCategoryCollection = client.db('CarsPortal').collection('CarsCollection')
+        const CetagoryCollection = client.db('CarsPortal').collection('Category');
+
 
         app.get('/CarsCollection', async (req, res) => {
             const query = {};
@@ -27,17 +29,17 @@ async function run() {
             res.send(options)
         });
 
-        app.get('/allcar', async (req, res) => {
+        app.get('/category', async (req, res) => {
             const query = {};
-            const cursor = carCategoryCollection.find(query);
-            const allcar = await cursor.toArray();
-            res.send(allcar);
+            const cursor = await CetagoryCollection.find(query).toArray();
+            res.send(cursor);
         });
 
         app.get('/allcar/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const service = await carCategoryCollection.findOne(query)
+            console.log(id);
+            const query = { categoryName: id };
+            const service = await carCategoryCollection.find(query).toArray();
             res.send(service)
         });
 
