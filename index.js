@@ -13,7 +13,6 @@ app.use(express.json())
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.afkplob.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
@@ -21,10 +20,14 @@ async function run() {
     try {
         const carCategoryCollection = client.db('CarsPortal').collection('CarsCollection')
         const CetagoryCollection = client.db('CarsPortal').collection('Category');
+        const ordersCollection = client.db('CarsPortal').collection('orders');
+        const usersCollection = client.db('CarsPortal').collection('users');
 
 
         app.get('/CarsCollection', async (req, res) => {
+            const date = req.query.date;
             const query = {};
+            // console.log(date)
             const options = await carCategoryCollection.find(query).limit(3).toArray();
             res.send(options)
         });
@@ -37,12 +40,30 @@ async function run() {
 
         app.get('/allcar/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const query = { categoryName: id };
             const service = await carCategoryCollection.find(query).toArray();
             res.send(service)
         });
 
+        app.get('/orders', async (req, res) => {
+            const query = {};
+            const cursor = await ordersCollection.find(query).toArray();
+            res.send(cursor);
+        });
+
+        app.post('/orders', async (req, res) => {
+            const orders = req.body;
+            const result = await ordersCollection.insertOne(orders);
+            res.send(result);
+        });
+
+        //--------------//
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.send(result)
+        })
     }
     finally {
 
