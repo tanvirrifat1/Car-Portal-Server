@@ -166,26 +166,19 @@ async function run() {
             const user = await usersCollection.findOne(query);
             res.send({ isSeller: user?.role === 'seller' });
         });
-        // //---------delete-----------//
-        // app.delete('/users/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: ObjectId(id) }
-        //     const result = await usersCollection.deleteOne(filter);
-        //     res.send(result)
-        // })
-        // //------------//
+        //------deleteUser-----------//
+        app.delete('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email }
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result)
+        })
+        //------------------//
         app.get('/products', async (req, res) => {
             const query = {};
             const product = await productsCollection.find(query).toArray();
             res.send(product)
         })
-        //------------//
-        // add car.........
-        // app.put('/addcar', async (req, res) => {
-        //     const query = req.body;
-        //     const result = await carCategoryCollection.insertOne(query);
-        //     res.send(result);
-        // });
 
         //----------//
         app.post('/products', async (req, res) => {
