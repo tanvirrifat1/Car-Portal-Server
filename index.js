@@ -167,9 +167,9 @@ async function run() {
             res.send({ isSeller: user?.role === 'seller' });
         });
         //------deleteUser-----------//
-        app.delete('/users/:email', async (req, res) => {
-            const email = req.params.email;
-            const filter = { email: email }
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
             const result = await usersCollection.deleteOne(filter);
             res.send(result)
         })
