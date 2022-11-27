@@ -26,7 +26,7 @@ function verifyJWT(req, res, next) {
     }
 
     const token = authHeader.split(' ')[1];
-
+    // console.log(authHeader)
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
         if (err) {
             return res.status(403).send({ message: 'forbidden access' })
@@ -43,13 +43,14 @@ async function run() {
         const CetagoryCollection = client.db('CarsPortal').collection('Category');
         const ordersCollection = client.db('CarsPortal').collection('orders');
         const usersCollection = client.db('CarsPortal').collection('users');
+        const productsCollection = client.db('CarsPortal').collection('products');
 
 
         app.get('/CarsCollection', async (req, res) => {
             const date = req.query.date;
             const query = {};
             // console.log(date)
-            const options = await carCategoryCollection.find(query).limit(3).toArray();
+            const options = await carCategoryCollection.find(query).toArray();
             res.send(options)
         });
 
@@ -58,14 +59,28 @@ async function run() {
             const cursor = await CetagoryCollection.find(query).toArray();
             res.send(cursor);
         });
-
+        //-----------//
         app.get('/allcar/:id', async (req, res) => {
             const id = req.params.id;
             // console.log(id);
-            const query = { categoryName: id };
+            const query = { categoryId: id };
             const service = await carCategoryCollection.find(query).toArray();
             res.send(service)
         });
+        //--------------//
+        app.get('/addProduct', async (req, res) => {
+            const query = {};
+            const result = await CetagoryCollection.find(query).project({ name: 1 }).toArray();
+            res.send(result)
+        })
+        // app.post('/addProduct/email', async (req, res) => {
+        //     const email = req.params.email;
+        //     const query = { email: email }
+        //     const cars = await carCategoryCollection.insertOne(query)
+        //     res.send(cars)
+        // })
+
+
 
         // app.get('/orders', async (req, res) => {
         //     const query = {};
@@ -116,7 +131,23 @@ async function run() {
             res.send(result)
         });
         //---------//
-        app.put('/users/admin/:id', async (req, res) => {
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'admin' });
+        })
+
+        //---------//
+        app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
@@ -127,8 +158,48 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result)
+        });
+        //-----------//
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.role === 'seller' });
+        });
+        // //---------delete-----------//
+        // app.delete('/users/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: ObjectId(id) }
+        //     const result = await usersCollection.deleteOne(filter);
+        //     res.send(result)
+        // })
+        // //------------//
+        app.get('/products', async (req, res) => {
+            const query = {};
+            const product = await productsCollection.find(query).toArray();
+            res.send(product)
         })
+        //------------//
+        // add car.........
+        // app.put('/addcar', async (req, res) => {
+        //     const query = req.body;
+        //     const result = await carCategoryCollection.insertOne(query);
+        //     res.send(result);
+        // });
 
+        //----------//
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result)
+        })
+        //------------//
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(filter);
+            res.send(result)
+        })
     }
     finally {
 
