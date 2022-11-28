@@ -53,7 +53,6 @@ async function run() {
         app.get('/CarsCollection', async (req, res) => {
             const date = req.query.date;
             const query = {};
-            // console.log(date)
             const options = await carCategoryCollection.find(query).toArray();
             res.send(options)
         });
@@ -66,7 +65,7 @@ async function run() {
         //-----------//
         app.get('/allcar/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+
             const query = { categoryId: id };
             const service = await carCategoryCollection.find(query).toArray();
             res.send(service)
