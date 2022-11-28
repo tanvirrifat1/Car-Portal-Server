@@ -66,7 +66,7 @@ async function run() {
         //-----------//
         app.get('/allcar/:id', async (req, res) => {
             const id = req.params.id;
-            // console.log(id);
+            console.log(id);
             const query = { categoryId: id };
             const service = await carCategoryCollection.find(query).toArray();
             res.send(service)
@@ -77,20 +77,7 @@ async function run() {
             const result = await CetagoryCollection.find(query).project({ name: 1 }).toArray();
             res.send(result)
         })
-        // app.post('/addProduct/email', async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email }
-        //     const cars = await carCategoryCollection.insertOne(query)
-        //     res.send(cars)
-        // })
 
-
-
-        // app.get('/orders', async (req, res) => {
-        //     const query = {};
-        //     const cursor = await ordersCollection.find(query).toArray();
-        //     res.send(cursor);
-        // });
 
         app.get('/orders', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -239,9 +226,27 @@ async function run() {
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
-            const result = await productsCollection.deleteOne(filter);
+            const result = await carCategoryCollection.deleteOne(filter);
             res.send(result)
         })
+
+
+        //  get all car......
+        app.put('/addcar', async (req, res) => {
+            const query = req.body;
+            const result = await carCategoryCollection.insertOne(query);
+            res.send(result);
+        });
+
+        //  get all car......
+        app.get('/myproduct', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            console.log(query);
+            const result = await carCategoryCollection.find(query).toArray();
+            res.send(result);
+        })
+
     }
     finally {
 
